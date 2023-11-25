@@ -1,21 +1,26 @@
 from typing import Union, List
-from fastapi import FastAPI, Query, Request
+from fastapi import FastAPI, Query, Request, Response
 from pydantic import BaseModel
 from fastapi.responses import RedirectResponse
 from models import Image, Tag, ImageTagLink, Session, engine
 from sqlmodel import select
 from api_documentation import generate_api_docs
-import random
+import random, json
 
 app = FastAPI()
 
 defined_tags = ['nature', 'ghibli', 'city', 'abstract', 'painting', 'digital_art', 'comfy', 'best']
 
+def format_json(resp: str):
+    # properly format json responses with indentation so they look good on browsers
+    json_str = json.dumps(resp, indent=2, default=str)
+    return Response(content=json_str, media_type='application/json')
+
 @app.get("/")
 async def read_root(request: Request):
     base_url = str(request.base_url)
     api_docs = generate_api_docs(base_url)
-    return api_docs
+    return format_json(api_docs)
 
 @app.get("/random")
 async def get_random_image():
@@ -35,8 +40,9 @@ async def get_tagged_image(tag: str):
             randimg_url = tag_object.images[randimg_idx].url
             return RedirectResponse(url=randimg_url)
     else:
-        return {"error": f"Tag '{tag}' doesn't exist in the database. Try from one of the defined tags.",
+        resp = {"error": f"Tag '{tag}' doesn't exist in the database. Try from one of the defined tags.",
                 "defined_tags": defined_tags}
+        return format_json(resp)
 
 
 @app.get("/intersection/")
@@ -44,8 +50,9 @@ async def get_images_by_tags(tags: List[str] = Query(...)):
 
     # input sanitation: check if supplied tags actually exist in the db
     if not(set(tags).issubset(set(defined_tags))):
-        return {"error": "One or more of the supplied tags don't exist in the db. Try again with the defined tags.",
+        resp = {"error": "One or more of the supplied tags don't exist in the db. Try again with the defined tags.",
                 "defined_tags": defined_tags}
+        return format_json(resp)
     
     # Query for tags based on the provided names
     with Session(engine) as session:
@@ -74,7 +81,7 @@ async def get_images_by_tags(tags: List[str] = Query(...)):
         # print(image_ids)
 
         if not image_ids:
-            return {"error": "No images found with this intersection!"}
+            return format_json({"error": "No images found with this intersection!"})
 
         # Fetch image details using the collected image ids
         matching_images = session.exec(select(Image).where(Image.id.in_(image_ids))).all()
