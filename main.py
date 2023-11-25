@@ -1,10 +1,10 @@
 from typing import Union, List
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Request
 from pydantic import BaseModel
 from fastapi.responses import RedirectResponse
 from models import Image, Tag, ImageTagLink, Session, engine
 from sqlmodel import select
-from api_documentation import api_docs
+from api_documentation import generate_api_docs
 import random
 
 app = FastAPI()
@@ -12,7 +12,9 @@ app = FastAPI()
 defined_tags = ['nature', 'ghibli', 'city', 'abstract', 'painting', 'digital_art', 'comfy', 'best']
 
 @app.get("/")
-async def read_root():
+async def read_root(request: Request):
+    base_url = str(request.base_url)
+    api_docs = generate_api_docs(base_url)
     return api_docs
 
 @app.get("/random")
