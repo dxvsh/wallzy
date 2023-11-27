@@ -43,10 +43,16 @@ This endpoint supports a variable number of tags so you can supply more than two
 
 ## Usage
 
-You can start using the API with your browser by using the render deployment or by running it [locally](#running-locally).
+You can start using the API with your browser via the [render deployment](https://wallzy.onrender.com) or by running it [locally](#running-locally).
 
-Additionally, you can also use `wget` to directly download wallpapers from the API. Suppose you want to directly download a random "nature" wallpaper from the API, you can do it with `wget`:
+If using it in the browser feels cumbersome, then perhaps a better way would be to directly get wallpapers using your terminal with the help of tools like `curl` or `wget`. 
+Suppose you want to directly download a random "nature" wallpaper from the API, you can do it with `curl`:
 
+```bash
+$ curl -L -o background.jpg https://wallzy.onrender.com/nature
+```
+
+Or with `wget`:
 ```bash
 $ wget -O background.jpg https://wallzy.onrender.com/nature
 ```
@@ -71,3 +77,29 @@ uvicorn main:app --reload
 ```
 
 The local server should now be running at: [http://127.0.0.1:8000](http://127.0.0.1:8000).
+
+
+## Bash Script to automatically set wallpapers 
+
+If you're using the GNOME desktop environment on Linux, I've written a small bash script to fetch and set a wallpaper automatically.
+
+You can download the script `wallzy.sh` from this git repository and use it like so:
+
+1. Make the script executable:
+
+```bash
+$ chmod +x wallzy.sh
+```
+
+2. Use the script to automatically fetch and set a wallpaper with a given tag:
+```bash
+$ ./wallzy.sh <tag_name>
+```
+For example, if you want set a random wallpaper tagged "city" from the API, run:
+```bash
+$ ./wallzy.sh city
+```
+
+Please note that the script only works on the GNOME DE.
+
+And finally, thanks for your interest in this project! I hope it helped you find some good wallpapers!
